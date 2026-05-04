@@ -1,0 +1,34 @@
+{
+  "dataset_scale": {
+    "total_episodes": 2450,
+    "total_hours": 42.5,
+    "total_frames": 1530000,
+    "parts_per_assembly": 8,
+    "num_objects": 12,
+    "storage_gb": 480,
+    "robot_type": "Frida Bimanual (Sim) / Franka (Real)"
+  },
+  "modalities": [
+    "RGB (4 views)",
+    "Depth Maps",
+    "Point Clouds",
+    "Joint States",
+    "End-effector Pose",
+    "Object SegMasks",
+    "Natural Language",
+    "Tactile Feedback"
+  ],
+  "scenario_distribution": {
+    "standard_assembly": "60%",
+    "error_recovery": "25%",
+    "human_interruption": "15%"
+  },
+  "preview_metrics": {
+    "task_success_rate": {
+      "Basic Assembly": 0.92,
+      "Instruction Following": 0.85,
+      "Error Recovery": 0.64,
+      "Long-horizon Multi-step": 0.48
+    }
+  }
+}

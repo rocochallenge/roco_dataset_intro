@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RoCo Docs Viewer</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    body { margin:0; font-family:Inter,system-ui,sans-serif; background:#0b1020; color:#ecf0ff; }
+    .wrap { max-width: 920px; margin: 0 auto; padding: 24px; }
+    a { color:#6ee7d8; }
+    pre, code { background:#111a3a; border-radius:8px; }
+    pre { padding: 12px; overflow-x:auto; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <p><a href="../index.html">← Back to homepage</a></p>
+    <article id="content">Loading...</article>
+  </main>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const file = params.get('file') || 'overview.md';
+    const allow = new Set(['overview.md','data.md','installation.md','Example.md','utility.md']);
+    if (!allow.has(file)) {
+      document.getElementById('content').textContent = 'Invalid document.';
+    } else {
+      fetch(file).then(r => r.text()).then(md => {
+        document.getElementById('content').innerHTML = marked.parse(md);
+      }).catch(() => {
+        document.getElementById('content').textContent = 'Failed to load document.';
+      });
+    }
+  </script>
+</body>
+</html>
