@@ -110,6 +110,19 @@
     .stat-card { background: var(--card-dark); padding: 24px; border-radius: 12px; border: 1px solid var(--line); text-align: center; }
     .stat-card .big { font-size: 36px; font-weight: 800; color: #fff; }
 
+
+    .leaderboard-switch { display:flex; justify-content:center; gap:12px; margin-bottom:20px; }
+    .switch-btn { padding: 10px 16px; border-radius: 10px; border:1px solid var(--line); background: rgba(255,255,255,0.05); color: var(--text); cursor: pointer; font-weight: 600; }
+    .switch-btn.active { background: var(--accent); border-color: var(--accent); }
+    .leaderboard-card { background: var(--card-dark); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+    .table-wrap { overflow-x:auto; }
+    #leaderboard-table { width:100%; border-collapse: collapse; min-width: 920px; }
+    #leaderboard-table th, #leaderboard-table td { border-bottom:1px solid var(--line); padding: 11px 10px; text-align:center; font-size: 13px; }
+    #leaderboard-table th { background: rgba(255,255,255,0.05); }
+    .lb-team { font-weight: 700; }
+    .lb-pagination { display:flex; justify-content:space-between; align-items:center; padding: 14px 16px; }
+    .lb-page-btn { padding: 6px 12px; border-radius: 8px; border:1px solid var(--line); background: rgba(255,255,255,0.06); color: var(--text); cursor:pointer; }
+    .lb-page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
     .bib-box { background: #0f1630; padding: 20px; border-radius: 12px; border: 1px solid var(--line); font-family: monospace; font-size: 13px; overflow-x: auto; color: #c4d2ff; }
   </style>
 </head>
@@ -120,6 +133,7 @@
       <div class="menu">
         <a href="#dataset">Dataset</a>
         <a href="#benchmark">Task Videos</a>
+        <a href="#leaderboard">Leaderboard</a>
         <a href="#devkit">Docs</a>
       </div>
     </div>
@@ -196,11 +210,29 @@
           <div id="modalities-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
             </div>
         </div>
+      </div>
+    </div>
+  </section>
 
-        <div class="stat-card" style="text-align: left;">
-          <h3 style="margin-bottom: 15px; font-size: 14px; color: var(--accent-2);">Task Success Rates (Baseline)</h3>
-          <div id="bars-container">
-            </div>
+
+  <section id="leaderboard">
+    <div class="wrap">
+      <h2>Leaderboard</h2>
+      <div class="leaderboard-switch">
+        <button class="switch-btn active" id="sim-btn">Simulation</button>
+        <button class="switch-btn" id="onsite-btn">Onsite</button>
+      </div>
+      <div class="leaderboard-card">
+        <div class="table-wrap">
+          <table id="leaderboard-table">
+            <thead id="lb-head"></thead>
+            <tbody id="lb-body"></tbody>
+          </table>
+        </div>
+        <div class="lb-pagination">
+          <button class="lb-page-btn" id="lb-prev">Prev</button>
+          <span id="lb-page-info"></span>
+          <button class="lb-page-btn" id="lb-next">Next</button>
         </div>
       </div>
     </div>
@@ -271,28 +303,70 @@
             </div>
           `);
         });
-
-        // 3. Populate Task Bars
-        const barDiv = document.getElementById('bars-container');
-        Object.entries(data.preview_metrics.task_success_rate).forEach(([task, score]) => {
-          const percent = Math.round(score * 100);
-          barDiv.insertAdjacentHTML('beforeend', `
-            <div style="margin-bottom: 15px;">
-              <div style="display:flex; justify-content:space-between; font-size: 13px; margin-bottom: 5px;">
-                <span>${task}</span>
-                <span style="color: var(--accent-2)">${percent}%</span>
-              </div>
-              <div style="height: 6px; background: #0f1630; border-radius: 10px; overflow: hidden;">
-                <div style="width: ${percent}%; height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2));"></div>
-              </div>
-            </div>
-          `);
-        });
       })
       .catch(err => {
         console.error("Failed to load JSON:", err);
         document.getElementById('stats').insertAdjacentHTML('beforeend', '<p style="text-align:center; color:red">Error loading dataset_result.json</p>');
       });
+
+
+    const PAGE_SIZE = 6;
+    let lbMode = 'sim';
+    let lbPage = 1;
+    const lbData = { sim: [], onsite: [] };
+
+    Promise.all([
+      fetch('docs/results.json').then(r => r.json()),
+      fetch('docs/onsite_results.json').then(r => r.json())
+    ]).then(([sim, onsite]) => {
+      lbData.sim = sim;
+      lbData.onsite = onsite;
+      renderLeaderboard();
+    });
+
+    function getSortedData() {
+      const rows = [...lbData[lbMode]];
+      rows.sort((a, b) => Number(b.FinalScore) - Number(a.FinalScore));
+      return rows;
+    }
+
+    function renderLeaderboard() {
+      const headers = lbMode === 'sim'
+        ? ['Rank', 'Team', 'S1', 'S2', 'S3', 'Final Score', 'Institution']
+        : ['Rank', 'Team', 'S1', 'S2', 'S3', 'Final Score', 'Online Score', 'Institution'];
+      document.getElementById('lb-head').innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+
+      const rows = getSortedData();
+      const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+      lbPage = Math.min(lbPage, totalPages);
+      const pageRows = rows.slice((lbPage - 1) * PAGE_SIZE, lbPage * PAGE_SIZE);
+
+      document.getElementById('lb-body').innerHTML = pageRows.map((r, i) => {
+        const rank = (lbPage - 1) * PAGE_SIZE + i + 1;
+        const online = lbMode === 'onsite' ? `<td>${Number(r.OnlineScore).toFixed(3)}</td>` : '';
+        return `<tr><td>${rank}</td><td class="lb-team">${r.Team}</td><td>${Number(r.S1).toFixed(3)}</td><td>${Number(r.S2).toFixed(3)}</td><td>${Number(r.S3).toFixed(3)}</td><td>${Number(r.FinalScore).toFixed(3)}</td>${online}<td>${r.Institution || '—'}</td></tr>`;
+      }).join('');
+
+      document.getElementById('lb-page-info').textContent = `Page ${lbPage} / ${totalPages}`;
+      document.getElementById('lb-prev').disabled = lbPage <= 1;
+      document.getElementById('lb-next').disabled = lbPage >= totalPages;
+    }
+
+    document.getElementById('sim-btn').addEventListener('click', () => {
+      lbMode = 'sim'; lbPage = 1;
+      document.getElementById('sim-btn').classList.add('active');
+      document.getElementById('onsite-btn').classList.remove('active');
+      renderLeaderboard();
+    });
+    document.getElementById('onsite-btn').addEventListener('click', () => {
+      lbMode = 'onsite'; lbPage = 1;
+      document.getElementById('onsite-btn').classList.add('active');
+      document.getElementById('sim-btn').classList.remove('active');
+      renderLeaderboard();
+    });
+    document.getElementById('lb-prev').addEventListener('click', () => { lbPage -= 1; renderLeaderboard(); });
+    document.getElementById('lb-next').addEventListener('click', () => { lbPage += 1; renderLeaderboard(); });
+
   </script>
 </body>
 </html>
