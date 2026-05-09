@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>RoCo Challenge Dataset (Anonymous IJRR Submission)</title>
+  <link rel="icon" type="image/png" href="assert/icon.png" />
   <style>
     :root {
       --bg: #0b1020;
@@ -146,7 +147,6 @@
       <p class="subtitle">A real-and-simulation benchmark for human-centered robot collaboration with instruction following and error recovery.</p>
       <div class="cta">
         <a class="btn primary" href="https://huggingface.co/datasets/rocochallenge2025/rocochallenge2025">Download Data</a>
-        <a class="btn outline" href="https://arxiv.org/abs/2603.15469">Read Paper</a>
       </div>
     </div>
   </header>
@@ -183,7 +183,14 @@
           <video controls preload="metadata"><source src="video/task1.mp4" type="video/mp4" /></video>
           <div class="video-meta">
             <h3>Task 1: Assembly from Scratch</h3>
-            <p>Robot completes the entire assembly sequence without human intervention. Task2 is the subset of Task1, as the assembly sequence starting from a predefined intermediate state.</p>
+            <p>Robot completes the entire assembly sequence without human intervention.</p>
+          </div>
+        </div>
+        <div class="video-card">
+          <video controls preload="metadata"><source src="video/task2.mp4" type="video/mp4" /></video>
+          <div class="video-meta">
+            <h3>Task 2: Resume from Partial State</h3>
+            <p>Robot resumes the assembly sequence from a predefined intermediate state, simulating a handover from a virtual human operator. The agent must perceive the current configuration and continue the task correctly.</p>
           </div>
         </div>
         <div class="video-card">
@@ -277,8 +284,8 @@
         // 1. Populate KPI Cards
         const kpi = document.getElementById('kpi');
         const coreStats = [
-          ['Total Episodes', data.dataset_scale.total_episodes],
-          ['Total Hours', data.dataset_scale.total_hours],
+          // ['Total Episodes', data.dataset_scale.total_episodes],
+          // ['Total Hours', data.dataset_scale.total_hours],
           ['Total Frames', (data.dataset_scale.total_frames / 1000).toFixed(0) + 'k+'],
           ['Parts / Assy', data.dataset_scale.parts_per_assembly],
           ['Unique Objects', data.dataset_scale.num_objects],

@@ -3,17 +3,16 @@
     "total_episodes": 918,
     "total_hours": 12.75,
     "total_frames": 717354,
-    "parts_per_assembly": "4-7",
-    "num_objects": 11,
+    "parts_per_assembly": "3-7",
+    "num_objects": 8,
     "storage_gb": 2320,
-    "robot_type": "Galaxea R1 (Sim) / Galaxea R1 & Galaxea R1 Lite (Real)"
+    "robot_type": "Galaxea R1 & R1 Lite (Sim & Real)"
   },
   "modalities": [
-    "RGB (4 views)",
-    "Depth Maps",
+    "RGB (3 views)",
+    "Depth Map",
     "Joint States",
-    "End-effector Pose",
-    "Natural Language"
+    "End-effector Pose"
   ],
   "scenario_distribution": {
     "standard_assembly": "66%",
