@@ -77,6 +77,18 @@
       object-fit: contain;
       filter: drop-shadow(0 8px 20px rgba(0,0,0,0.12));
     }
+
+    .carousel { position: relative; display: block; padding: 0; overflow: hidden; }
+    .carousel-viewport { width: 100%; aspect-ratio: 16 / 10; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .carousel-slide { display: none; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 8px 20px rgba(0,0,0,0.12)); }
+    .carousel-slide.active { display: block; }
+    .carousel-arrow { position: absolute; top: 50%; z-index: 2; width: 38px; height: 38px; border: 1px solid rgba(23,32,50,.18); border-radius: 50%; background: rgba(255,255,255,.9); color: #1a202c; font-size: 28px; line-height: 1; cursor: pointer; transform: translateY(-50%); box-shadow: 0 4px 14px rgba(0,0,0,.16); }
+    .carousel-arrow:hover:not(:disabled) { background: #fff; transform: translateY(-50%) scale(1.05); }
+    .carousel-arrow:disabled { cursor: default; opacity: .35; }
+    .carousel-prev { left: 12px; }
+    .carousel-next { right: 12px; }
+    .carousel-controls { position: absolute; right: 0; bottom: 10px; left: 0; display: flex; justify-content: center; pointer-events: none; }
+    .carousel-counter { padding: 4px 9px; border-radius: 999px; background: rgba(11,16,32,.7); color: #fff; font-size: 11px; font-variant-numeric: tabular-nums; }
     .data-info { padding: 16px 20px; background: rgba(0,0,0,0.03); border-top: 1px solid rgba(0,0,0,0.05); }
     .data-info h3 { margin: 0 0 4px; color: #1a202c; font-size: 18px; }
     .data-info p { margin: 0; color: #4a5568; font-size: 14px; }
@@ -125,6 +137,23 @@
     .lb-page-btn { padding: 6px 12px; border-radius: 8px; border:1px solid var(--line); background: rgba(255,255,255,0.06); color: var(--text); cursor:pointer; }
     .lb-page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
     .bib-box { background: #0f1630; padding: 20px; border-radius: 12px; border: 1px solid var(--line); font-family: monospace; font-size: 13px; overflow-x: auto; color: #c4d2ff; }
+
+    /* Contact questionnaire */
+    .contact-copy { max-width: 680px; margin: -12px auto 32px; text-align: center; color: var(--muted); }
+    .contact-card { max-width: 760px; margin: 0 auto; padding: 30px; background: var(--card-dark); border: 1px solid var(--line); border-radius: 18px; }
+    .contact-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .contact-field { display: flex; flex-direction: column; gap: 7px; }
+    .contact-field.full { grid-column: 1 / -1; }
+    .contact-field label { font-size: 13px; font-weight: 600; color: var(--text); }
+    .contact-field input, .contact-field select, .contact-field textarea { width: 100%; padding: 12px 13px; border: 1px solid var(--line); border-radius: 9px; background: #0f1630; color: var(--text); font: inherit; }
+    .contact-field textarea { min-height: 120px; resize: vertical; }
+    .contact-field input:focus, .contact-field select:focus, .contact-field textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+    .contact-actions { display: flex; align-items: center; gap: 16px; margin-top: 22px; }
+    .contact-status { min-height: 24px; color: var(--muted); font-size: 13px; }
+    .contact-status.success { color: var(--accent-2); }
+    .contact-status.error { color: #ff9b9b; }
+    .honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+    @media (max-width: 600px) { .contact-card { padding: 20px; } .contact-grid { grid-template-columns: 1fr; } .contact-field.full { grid-column: auto; } .contact-actions { align-items: flex-start; flex-direction: column; } }
   </style>
 </head>
 <body>
@@ -136,6 +165,7 @@
         <a href="#benchmark">Task Videos</a>
         <a href="#leaderboard">Leaderboard</a>
         <a href="#devkit">Docs</a>
+        <a href="#contact">Contact</a>
       </div>
     </div>
   </nav>
@@ -156,20 +186,51 @@
       <h2>Dataset Visual Overview</h2>
       <div class="dataset-grid">
         <article class="data-item">
-          <div class="img-container"><img src="assert/objects.png" alt="Objects" /></div>
-          <div class="data-info"><h3>Operation Objects</h3><p>Key gearbox components for assembly tasks.</p></div>
+          <div class="img-container carousel" data-carousel>
+            <div class="carousel-viewport">
+              <img class="carousel-slide active" src="assert/objects.png" alt="Operation objects" data-caption="Key gearbox components for assembly tasks." />
+              <img class="carousel-slide" src="assert/r2_taskboard_nine_parts.png" alt="Industrial Board" data-caption="Industrial Board" />
+            </div>
+            <button class="carousel-arrow carousel-prev" type="button" aria-label="Previous Operation Objects image">‹</button>
+            <button class="carousel-arrow carousel-next" type="button" aria-label="Next Operation Objects image">›</button>
+            <div class="carousel-controls"><span class="carousel-counter" aria-live="polite">1 / 2</span></div>
+          </div>
+          <div class="data-info"><h3>Operation Objects</h3><p class="carousel-description">Key gearbox components for assembly tasks.</p></div>
         </article>
         <article class="data-item">
-          <div class="img-container"><img src="assert/real_data_frame.png" alt="Real Data" /></div>
-          <div class="data-info"><h3>Real-world Data</h3><p>Synchronized multi-view physical collection.</p></div>
+          <div class="img-container carousel" data-carousel>
+            <div class="carousel-viewport">
+              <img class="carousel-slide active" src="assert/real_data_frame.png" alt="Real-world data frame" data-caption="Synchronized multi-view physical collection." />
+              <img class="carousel-slide" src="assert/r2_taskboard_rgbd.png" alt="Real-world RGB-D data" data-caption="RGB-D view of the taskboard." />
+            </div>
+            <button class="carousel-arrow carousel-prev" type="button" aria-label="Previous Real-world Data image">‹</button>
+            <button class="carousel-arrow carousel-next" type="button" aria-label="Next Real-world Data image">›</button>
+            <div class="carousel-controls"><span class="carousel-counter" aria-live="polite">1 / 2</span></div>
+          </div>
+          <div class="data-info"><h3>Real-world Data</h3><p class="carousel-description">Synchronized multi-view physical collection.</p></div>
         </article>
         <article class="data-item">
-          <div class="img-container"><img src="assert/sim_data_frame.png" alt="Sim Data" /></div>
-          <div class="data-info"><h3>Simulation Data</h3><p>Scalable synthetic training environment.</p></div>
+          <div class="img-container carousel" data-carousel>
+            <div class="carousel-viewport">
+              <img class="carousel-slide active" src="assert/sim_data_frame.png" alt="Simulation data" data-caption="Scalable synthetic training environment." />
+            </div>
+            <button class="carousel-arrow carousel-prev" type="button" aria-label="Previous Simulation Data image" disabled>‹</button>
+            <button class="carousel-arrow carousel-next" type="button" aria-label="Next Simulation Data image" disabled>›</button>
+            <div class="carousel-controls"><span class="carousel-counter" aria-live="polite">1 / 1</span></div>
+          </div>
+          <div class="data-info"><h3>Simulation Data</h3><p class="carousel-description">Scalable synthetic training environment.</p></div>
         </article>
         <article class="data-item">
-          <div class="img-container"><img src="assert/robot_platform.png" alt="Platform" /></div>
-          <div class="data-info"><h3>Robot Platform</h3><p>Bimanual hardware and sensor configuration.</p></div>
+          <div class="img-container carousel" data-carousel>
+            <div class="carousel-viewport">
+              <img class="carousel-slide active" src="assert/robot_platform.png" alt="Robot platform" data-caption="Bimanual hardware and sensor configuration." />
+              <img class="carousel-slide" src="assert/r2_r1pro_teleop.png" alt="R1 Pro teleoperation setup" data-caption="R1 Pro teleoperation setup." />
+            </div>
+            <button class="carousel-arrow carousel-prev" type="button" aria-label="Previous Robot Platform image">‹</button>
+            <button class="carousel-arrow carousel-next" type="button" aria-label="Next Robot Platform image">›</button>
+            <div class="carousel-controls"><span class="carousel-counter" aria-live="polite">1 / 2</span></div>
+          </div>
+          <div class="data-info"><h3>Robot Platform</h3><p class="carousel-description">Bimanual hardware and sensor configuration.</p></div>
         </article>
       </div>
     </div>
@@ -273,47 +334,106 @@
     </div>
   </section>
 
+
+  <section id="contact">
+    <div class="wrap">
+      <h2>Submit for Real-world Evaluation</h2>
+      <p class="contact-copy">Submit your model weights and project code for real-world evaluation. Please provide links that the evaluation team can access.</p>
+      <div class="contact-card">
+        <form id="contact-form" action="https://formsubmit.co/rocochallenge@gmail.com" method="POST">
+          <input type="hidden" name="_subject" value="RoCo Challenge real-world evaluation submission" />
+          <input type="hidden" name="_template" value="table" />
+          <input type="hidden" name="_captcha" value="false" />
+          <input type="text" name="_honey" class="honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" />
+          <div class="contact-grid">
+            <div class="contact-field">
+              <label for="contact-name">Name *</label>
+              <input id="contact-name" name="name" type="text" autocomplete="name" required />
+            </div>
+            <div class="contact-field">
+              <label for="contact-email">Email *</label>
+              <input id="contact-email" name="_replyto" type="email" autocomplete="email" required />
+            </div>
+            <div class="contact-field">
+              <label for="contact-org">Institution / Company</label>
+              <input id="contact-org" name="institution" type="text" autocomplete="organization" />
+            </div>
+            <div class="contact-field">
+              <label for="contact-weights">Model weights link *</label>
+              <input id="contact-weights" name="model_weights_link" type="url" placeholder="Hugging Face or Google Drive link" required />
+            </div>
+            <div class="contact-field full">
+              <label for="contact-code">Project code + README link *</label>
+              <input id="contact-code" name="project_code_link" type="url" placeholder="GitHub repository or ZIP file link" required />
+            </div>
+            <div class="contact-field full">
+              <label for="contact-message">Notes for the evaluation team</label>
+              <textarea id="contact-message" name="message" placeholder="Hardware setup, run instructions, or other notes"></textarea>
+            </div>
+          </div>
+          <div class="contact-actions">
+            <button class="btn primary" type="submit">Submit Questionnaire</button>
+            <div id="contact-status" class="contact-status" role="status" aria-live="polite"></div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
   <footer style="text-align: center; padding: 40px 0; color: var(--muted); border-top: 1px solid var(--line);">
     <div class="wrap">&copy; 2026 RoCo Challenge Project. Anonymous Submission.</div>
   </footer>
 
 <script>
+    const inlineDatasetResult = {
+      dataset_scale: {
+        total_frames: 717354,
+        parts_per_assembly: '3-7',
+        num_objects: 8,
+        storage_gb: 2320
+      },
+      modalities: ['RGB (3 views)', 'Depth Map', 'Joint States', 'End-effector Pose']
+    };
+
+    const renderDatasetStats = (data) => {
+      // 1. Populate KPI Cards
+      const kpi = document.getElementById('kpi');
+      const coreStats = [
+        ['Total Frames', (data.dataset_scale.total_frames / 1000).toFixed(0) + 'k+'],
+        ['Parts / Assy', data.dataset_scale.parts_per_assembly],
+        ['Unique Objects', data.dataset_scale.num_objects],
+        ['Storage Size', data.dataset_scale.storage_gb + ' GB']
+      ];
+
+      coreStats.forEach(([label, val]) => {
+        kpi.insertAdjacentHTML('beforeend', `
+          <div class="stat-card">
+            <h3 style="font-size: 12px; opacity: 0.7; margin-bottom: 8px;">${label}</h3>
+            <div class="big" style="font-size: 28px;">${val}</div>
+          </div>
+        `);
+      });
+
+      // 2. Populate Modalities
+      const modDiv = document.getElementById('modalities-list');
+      data.modalities.forEach(mod => {
+        modDiv.insertAdjacentHTML('beforeend', `
+          <div style="font-size: 14px; display: flex; align-items: center; gap: 8px;">
+            <span style="color: var(--accent-2)">✔</span> ${mod}
+          </div>
+        `);
+      });
+    };
+
     fetch('dataset_result.json')
-      .then(r => r.json())
-      .then(data => {
-        // 1. Populate KPI Cards
-        const kpi = document.getElementById('kpi');
-        const coreStats = [
-          // ['Total Episodes', data.dataset_scale.total_episodes],
-          // ['Total Hours', data.dataset_scale.total_hours],
-          ['Total Frames', (data.dataset_scale.total_frames / 1000).toFixed(0) + 'k+'],
-          ['Parts / Assy', data.dataset_scale.parts_per_assembly],
-          ['Unique Objects', data.dataset_scale.num_objects],
-          ['Storage Size', data.dataset_scale.storage_gb + ' GB']
-        ];
-
-        coreStats.forEach(([label, val]) => {
-          kpi.insertAdjacentHTML('beforeend', `
-            <div class="stat-card">
-              <h3 style="font-size: 12px; opacity: 0.7; margin-bottom: 8px;">${label}</h3>
-              <div class="big" style="font-size: 28px;">${val}</div>
-            </div>
-          `);
-        });
-
-        // 2. Populate Modalities
-        const modDiv = document.getElementById('modalities-list');
-        data.modalities.forEach(mod => {
-          modDiv.insertAdjacentHTML('beforeend', `
-            <div style="font-size: 14px; display: flex; align-items: center; gap: 8px;">
-              <span style="color: var(--accent-2)">✔</span> ${mod}
-            </div>
-          `);
-        });
+      .then(response => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
       })
+      .then(renderDatasetStats)
       .catch(err => {
-        console.error("Failed to load JSON:", err);
-        document.getElementById('stats').insertAdjacentHTML('beforeend', '<p style="text-align:center; color:red">Error loading dataset_result.json</p>');
+        console.warn('Using inline dataset statistics:', err.message);
+        renderDatasetStats(inlineDatasetResult);
       });
 
 
@@ -373,6 +493,56 @@
     });
     document.getElementById('lb-prev').addEventListener('click', () => { lbPage -= 1; renderLeaderboard(); });
     document.getElementById('lb-next').addEventListener('click', () => { lbPage += 1; renderLeaderboard(); });
+
+
+
+
+    document.querySelectorAll('[data-carousel]').forEach((carousel) => {
+      const slides = [...carousel.querySelectorAll('.carousel-slide')];
+      const previous = carousel.querySelector('.carousel-prev');
+      const next = carousel.querySelector('.carousel-next');
+      const counter = carousel.querySelector('.carousel-counter');
+      let current = 0;
+
+      const renderCarousel = () => {
+        slides.forEach((slide, index) => slide.classList.toggle('active', index === current));
+        previous.disabled = current === 0;
+        next.disabled = current === slides.length - 1;
+        counter.textContent = `${current + 1} / ${slides.length}`;
+        const description = carousel.closest('.data-item')?.querySelector('.carousel-description');
+        if (description && slides[current].dataset.caption) description.textContent = slides[current].dataset.caption;
+      };
+      previous.addEventListener('click', () => { current -= 1; renderCarousel(); });
+      next.addEventListener('click', () => { current += 1; renderCarousel(); });
+      renderCarousel();
+    });
+
+    // Submit the questionnaire through FormSubmit without leaving the page.
+    const contactForm = document.getElementById('contact-form');
+    const contactStatus = document.getElementById('contact-status');
+    contactForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const submitButton = contactForm.querySelector('button[type="submit"]');
+      submitButton.disabled = true;
+      contactStatus.className = 'contact-status';
+      contactStatus.textContent = 'Sending…';
+      try {
+        const response = await fetch(contactForm.action.replace('formsubmit.co/', 'formsubmit.co/ajax/'), {
+          method: 'POST',
+          headers: { Accept: 'application/json' },
+          body: new FormData(contactForm)
+        });
+        if (!response.ok) throw new Error('Request failed');
+        contactForm.reset();
+        contactStatus.className = 'contact-status success';
+        contactStatus.textContent = 'Thanks — your questionnaire was sent successfully.';
+      } catch (error) {
+        contactStatus.className = 'contact-status error';
+        contactStatus.textContent = 'Unable to send right now. Please try again later.';
+      } finally {
+        submitButton.disabled = false;
+      }
+    });
 
   </script>
 </body>
