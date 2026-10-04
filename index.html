@@ -152,6 +152,8 @@
     .contact-status { min-height: 24px; color: var(--muted); font-size: 13px; }
     .contact-status.success { color: var(--accent-2); }
     .contact-status.error { color: #ff9b9b; }
+    .contact-fallback { color: var(--accent-2); font-size: 13px; }
+    .contact-fallback[hidden] { display: none; }
     .honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
     @media (max-width: 600px) { .contact-card { padding: 20px; } .contact-grid { grid-template-columns: 1fr; } .contact-field.full { grid-column: auto; } .contact-actions { align-items: flex-start; flex-direction: column; } }
   </style>
@@ -338,7 +340,7 @@
   <section id="contact">
     <div class="wrap">
       <h2>Submit for Real-world Evaluation</h2>
-      <p class="contact-copy">Submit your model weights and project code for real-world evaluation. Please provide links that the evaluation team can access.</p>
+      <p class="contact-copy">Submit your model weights and project code for real-world evaluation. Your submission is sent to <a href="mailto:rocochallenge@gmail.com">rocochallenge@gmail.com</a>. The first submission may require the evaluation team to confirm the form service activation email.</p>
       <div class="contact-card">
         <form id="contact-form" action="https://formsubmit.co/rocochallenge@gmail.com" method="POST">
           <input type="hidden" name="_subject" value="RoCo Challenge real-world evaluation submission" />
@@ -375,6 +377,7 @@
             <button class="btn primary" type="submit">Submit Questionnaire</button>
             <div id="contact-status" class="contact-status" role="status" aria-live="polite"></div>
           </div>
+          <a id="contact-fallback" class="contact-fallback" href="mailto:rocochallenge@gmail.com" hidden>Open an email draft instead</a>
         </form>
       </div>
     </div>
@@ -518,31 +521,70 @@
     });
 
     // Submit the questionnaire through FormSubmit without leaving the page.
+    // FormSubmit can return HTTP 200 for a request that still needs activation,
+    // so check its JSON success flag before telling the user it was accepted.
     const contactForm = document.getElementById('contact-form');
     const contactStatus = document.getElementById('contact-status');
+    const contactFallback = document.getElementById('contact-fallback');
+    const contactRecipient = 'rocochallenge@gmail.com';
+
+    const updateContactFallback = () => {
+      const values = new FormData(contactForm);
+      const labels = [
+        ['Name', values.get('name')],
+        ['Email', values.get('_replyto')],
+        ['Institution / Company', values.get('institution')],
+        ['Model weights link', values.get('model_weights_link')],
+        ['Project code + README link', values.get('project_code_link')],
+        ['Notes for the evaluation team', values.get('message')]
+      ];
+      const body = labels
+        .filter(([, value]) => String(value || '').trim())
+        .map(([label, value]) => `${label}:\n${String(value).trim()}`)
+        .join('\n\n');
+      contactFallback.href = `mailto:${contactRecipient}?subject=${encodeURIComponent(values.get('_subject') || 'RoCo Challenge evaluation submission')}&body=${encodeURIComponent(body)}`;
+    };
+
+    contactForm.addEventListener('input', updateContactFallback);
     contactForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       const submitButton = contactForm.querySelector('button[type="submit"]');
       submitButton.disabled = true;
       contactStatus.className = 'contact-status';
       contactStatus.textContent = 'Sending…';
+      updateContactFallback();
+      contactFallback.hidden = true;
       try {
         const response = await fetch(contactForm.action.replace('formsubmit.co/', 'formsubmit.co/ajax/'), {
           method: 'POST',
           headers: { Accept: 'application/json' },
           body: new FormData(contactForm)
         });
-        if (!response.ok) throw new Error('Request failed');
+        let result = null;
+        try {
+          result = await response.json();
+        } catch (_) {
+          throw new Error('The form service returned an invalid response.');
+        }
+        const accepted = result && (result.success === true || result.success === 'true');
+        if (!response.ok || !accepted) {
+          throw new Error(result?.message || 'The form service did not accept the submission.');
+        }
         contactForm.reset();
         contactStatus.className = 'contact-status success';
-        contactStatus.textContent = 'Thanks — your questionnaire was sent successfully.';
+        contactStatus.textContent = 'Thanks — the form service accepted your questionnaire. Please check rocochallenge@gmail.com for the message.';
+        contactFallback.textContent = 'If the message does not appear, open an email draft';
+        contactFallback.hidden = false;
       } catch (error) {
         contactStatus.className = 'contact-status error';
-        contactStatus.textContent = 'Unable to send right now. Please try again later.';
+        contactStatus.textContent = 'The form service could not confirm delivery. Please use the email draft below.';
+        contactFallback.textContent = 'Open an email draft instead';
+        contactFallback.hidden = false;
       } finally {
         submitButton.disabled = false;
       }
     });
+    updateContactFallback();
 
   </script>
 </body>
