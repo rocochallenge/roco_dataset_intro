@@ -354,7 +354,8 @@
             </div>
             <div class="contact-field">
               <label for="contact-email">Email *</label>
-              <input id="contact-email" name="_replyto" type="email" autocomplete="email" required />
+              <input id="contact-email" name="email" type="email" autocomplete="email" required />
+              <input id="contact-replyto" name="_replyto" type="hidden" />
             </div>
             <div class="contact-field">
               <label for="contact-org">Institution / Company</label>
@@ -526,13 +527,20 @@
     const contactForm = document.getElementById('contact-form');
     const contactStatus = document.getElementById('contact-status');
     const contactFallback = document.getElementById('contact-fallback');
+    const contactEmail = document.getElementById('contact-email');
+    const contactReplyTo = document.getElementById('contact-replyto');
     const contactRecipient = 'rocochallenge@gmail.com';
 
+    const syncContactReplyTo = () => {
+      contactReplyTo.value = contactEmail.value.trim();
+    };
+
     const updateContactFallback = () => {
+      syncContactReplyTo();
       const values = new FormData(contactForm);
       const labels = [
         ['Name', values.get('name')],
-        ['Email', values.get('_replyto')],
+        ['Email', values.get('email')],
         ['Institution / Company', values.get('institution')],
         ['Model weights link', values.get('model_weights_link')],
         ['Project code + README link', values.get('project_code_link')],
