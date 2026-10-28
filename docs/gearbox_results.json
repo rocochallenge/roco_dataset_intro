@@ -1,0 +1,6 @@
+[
+  { "Method": "DP", "TotalMark": "0/200", "Score": 0, "Robot": "R1 Pro" },
+  { "Method": "ACT", "TotalMark": "0/200", "Score": 0, "Robot": "R1 Pro" },
+  { "Method": "pi05", "TotalMark": "7/200", "Score": 0.035, "Robot": "R1 Pro" },
+  { "Method": "FastWAM", "TotalMark": "1/200", "Score": 0.005, "Robot": "R1 Pro" }
+]
