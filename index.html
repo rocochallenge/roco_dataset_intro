@@ -466,8 +466,8 @@
     const lbSources = {
       sim: '',
       onsite: '',
-      gearbox: 'Source: gearbox - r1pro.xlsx (R1 Pro evaluation results)',
-      taskboard: 'Source: taskboard.xlsx (taskboard evaluation results)'
+      gearbox: 'Simulation: gearbox - r1pro.xlsx · Real-world: RoCo Technical Report, Gearbox physical baseline',
+      taskboard: 'Simulation: taskboard.xlsx · Real-world: RoCo Technical Report, Industrial Board physical baseline'
     };
 
     Promise.all([
@@ -485,7 +485,14 @@
 
     function getSortedData() {
       const rows = [...lbData[lbMode]];
-      if (lbMode === 'gearbox') rows.sort((a, b) => Number(b.Score) - Number(a.Score));
+      if (lbMode === 'gearbox') rows.sort((a, b) => {
+        const trackOrder = { Simulation: 0, 'Real-world': 1 };
+        return (trackOrder[a.Track] ?? 99) - (trackOrder[b.Track] ?? 99) || Number(b.Score) - Number(a.Score);
+      });
+      else if (lbMode === 'taskboard') rows.sort((a, b) => {
+        const trackOrder = { Simulation: 0, 'Real-world': 1 };
+        return (trackOrder[a.Track] ?? 99) - (trackOrder[b.Track] ?? 99) || a.Robot.localeCompare(b.Robot);
+      });
       else if (lbMode !== 'taskboard') rows.sort((a, b) => Number(b.FinalScore) - Number(a.FinalScore));
       return rows;
     }
@@ -496,22 +503,23 @@
         : lbMode === 'onsite'
           ? ['Rank', 'Team', 'S1', 'S2', 'S3', 'Final Score', 'Online Score', 'Institution']
           : lbMode === 'gearbox'
-            ? ['Rank', 'Method', 'Total Mark', 'Normalized Score', 'Robot']
-            : ['Rank', 'Robot', 'DP', 'ACT', 'pi05', 'FastWAM'];
+            ? ['Rank', 'Track', 'Method', 'Total Mark', 'Normalized Score', 'Robot']
+            : ['Rank', 'Track', 'Robot', 'DP', 'ACT', 'pi05', 'FastWAM'];
       document.getElementById('lb-head').innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
 
       const rows = getSortedData();
-      const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+      const pageSize = ['gearbox', 'taskboard'].includes(lbMode) ? 8 : PAGE_SIZE;
+      const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
       lbPage = Math.min(lbPage, totalPages);
-      const pageRows = rows.slice((lbPage - 1) * PAGE_SIZE, lbPage * PAGE_SIZE);
+      const pageRows = rows.slice((lbPage - 1) * pageSize, lbPage * pageSize);
 
       document.getElementById('lb-body').innerHTML = pageRows.map((r, i) => {
-        const rank = (lbPage - 1) * PAGE_SIZE + i + 1;
+        const rank = (lbPage - 1) * pageSize + i + 1;
         if (lbMode === 'gearbox') {
-          return `<tr><td>${rank}</td><td class="lb-team">${r.Method}</td><td>${r.TotalMark}</td><td>${Number(r.Score).toFixed(3)}</td><td>${r.Robot}</td></tr>`;
+          return `<tr><td>${rank}</td><td>${r.Track}</td><td class="lb-team">${r.Method}</td><td>${r.TotalMark}</td><td>${Number(r.Score).toFixed(3)}</td><td>${r.Robot}</td></tr>`;
         }
         if (lbMode === 'taskboard') {
-          return `<tr><td>${rank}</td><td class="lb-team">${r.Robot}</td><td>${r.DP}</td><td>${r.ACT}</td><td>${r.pi05}</td><td>${r.FastWAM}</td></tr>`;
+          return `<tr><td>${rank}</td><td>${r.Track}</td><td class="lb-team">${r.Robot}</td><td>${r.DP}</td><td>${r.ACT}</td><td>${r.pi05}</td><td>${r.FastWAM}</td></tr>`;
         }
         const online = lbMode === 'onsite' ? `<td>${Number(r.OnlineScore).toFixed(3)}</td>` : '';
         return `<tr><td>${rank}</td><td class="lb-team">${r.Team}</td><td>${Number(r.S1).toFixed(3)}</td><td>${Number(r.S2).toFixed(3)}</td><td>${Number(r.S3).toFixed(3)}</td><td>${Number(r.FinalScore).toFixed(3)}</td>${online}<td>${r.Institution || '—'}</td></tr>`;

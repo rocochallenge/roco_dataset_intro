@@ -1,4 +1,5 @@
 [
-  { "Robot": "R1 Lite", "DP": "0/180", "ACT": "0/180", "pi05": "0/180", "FastWAM": "0/180" },
-  { "Robot": "R1 Pro", "DP": "0/180", "ACT": "0/180", "pi05": "0/180", "FastWAM": "0/180" }
+  { "Track": "Simulation", "Robot": "R1 Lite", "DP": "0/180", "ACT": "0/180", "pi05": "0/180", "FastWAM": "0/180" },
+  { "Track": "Simulation", "Robot": "R1 Pro", "DP": "0/180", "ACT": "0/180", "pi05": "0/180", "FastWAM": "0/180" },
+  { "Track": "Real-world", "Robot": "R1 Lite", "DP": "0/360", "ACT": "2/360", "pi05": "65/360", "FastWAM": "2/360" }
 ]
