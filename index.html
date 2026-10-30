@@ -504,7 +504,7 @@
           ? ['Rank', 'Team', 'S1', 'S2', 'S3', 'Final Score', 'Online Score', 'Institution']
           : lbMode === 'gearbox'
             ? ['Rank', 'Track', 'Method', 'Total Mark', 'Normalized Score', 'Robot']
-            : ['Rank', 'Track', 'Robot', 'DP', 'ACT', 'pi05', 'FastWAM'];
+            : ['Track', 'Robot', 'DP', 'ACT', 'pi05', 'FastWAM'];
       document.getElementById('lb-head').innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
 
       const rows = getSortedData();
@@ -514,12 +514,15 @@
       const pageRows = rows.slice((lbPage - 1) * pageSize, lbPage * pageSize);
 
       document.getElementById('lb-body').innerHTML = pageRows.map((r, i) => {
-        const rank = (lbPage - 1) * pageSize + i + 1;
+        const rowIndex = (lbPage - 1) * pageSize + i;
+        const rank = lbMode === 'gearbox'
+          ? rows.slice(0, rowIndex).filter(row => row.Track === r.Track).length + 1
+          : rowIndex + 1;
         if (lbMode === 'gearbox') {
           return `<tr><td>${rank}</td><td>${r.Track}</td><td class="lb-team">${r.Method}</td><td>${r.TotalMark}</td><td>${Number(r.Score).toFixed(3)}</td><td>${r.Robot}</td></tr>`;
         }
         if (lbMode === 'taskboard') {
-          return `<tr><td>${rank}</td><td>${r.Track}</td><td class="lb-team">${r.Robot}</td><td>${r.DP}</td><td>${r.ACT}</td><td>${r.pi05}</td><td>${r.FastWAM}</td></tr>`;
+          return `<tr><td>${r.Track}</td><td class="lb-team">${r.Robot}</td><td>${r.DP}</td><td>${r.ACT}</td><td>${r.pi05}</td><td>${r.FastWAM}</td></tr>`;
         }
         const online = lbMode === 'onsite' ? `<td>${Number(r.OnlineScore).toFixed(3)}</td>` : '';
         return `<tr><td>${rank}</td><td class="lb-team">${r.Team}</td><td>${Number(r.S1).toFixed(3)}</td><td>${Number(r.S2).toFixed(3)}</td><td>${Number(r.S3).toFixed(3)}</td><td>${Number(r.FinalScore).toFixed(3)}</td>${online}<td>${r.Institution || '—'}</td></tr>`;
